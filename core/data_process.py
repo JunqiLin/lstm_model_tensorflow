@@ -56,7 +56,7 @@ def loadCsvFromYahoo(fileName, dbName, symbol):
             bar.high = float(d['High'])
             bar.low = float(d['Low'])
             bar.close = float(d['Close'])
-            bar.datetime = datetime.strptime(d['Date'],'%Y-%m-%d')
+            bar.datetime = datetime.strptime(d['Date'],'%Y/%m/%d')
             bar.volume = d['Volume']
             
             flt = {'datetime':bar.datetime}
@@ -67,13 +67,14 @@ if __name__ =="__main__":
     flag="all"
     if flag =="all":
         path = os.path.abspath(os.path.dirname(os.getcwd()))+'/data'
-        filenames = os.listdir(path)
+#        filenames = os.listdir(path)[2:]
+        filenames=['add.csv']
         for f in filenames:
             print(f)
             fn = path+'/'+str(f)
             loadCsvFromYahoo(fn, DB_NAME, str(f)[:-4])
         print('All Data has been inserted')
-        
+#        
         
     
     

@@ -43,7 +43,8 @@ class DataGenerator(object):
         data.set_index(["datetime"], inplace=True)
         data = data[['symbol','open','close','high','low','volume']]
         
-        self.data = data[6000:]
+        self.data = data[:6000]
+#        self.data = data
         self.length = get_top(len(self.data))
         self.train_len = int(round(self.length*split))
         self.test_len = self.length - self.train_len
@@ -109,10 +110,13 @@ class DataGenerator(object):
             BATCH_START += 1
         
         testDataX = np.array(x_batch).reshape([-1]).reshape((BATCH_SIZE,TIME_STEPS))    
-        testDataY = np.array(y_batch).reshape([-1]).reshape((BATCH_SIZE,TIME_STEPS))    
+        testDataY = np.array(y_batch).reshape([-1]).reshape((BATCH_SIZE,TIME_STEPS))   
+        self.start += BATCH_SIZE
         return [testDataX[:,:,np.newaxis],testDataY[:,:,np.newaxis]]
     
-#dg = DataGenerator('AAPL',50,20,0.8)
+#dg = DataGenerator('add',50,20,0.8)
+#print(dg.data.head())
+#r = dg.get_batch()
 #r = dg.get_batch()
 #print(r)
 #print(dg.length)

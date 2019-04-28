@@ -113,7 +113,7 @@ if __name__ == '__main__':
     init = tf.global_variables_initializer()
     sess.run(init)
     split = 0.8
-    generator = DataGenerator('AAPL',BATCH_SIZE, TIME_STEPS, split)
+    generator = DataGenerator('add',BATCH_SIZE, TIME_STEPS, split)
     
 
     train_times = int((generator.length-TIME_STEPS*BATCH_SIZE)/TIME_STEPS*split)
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     
 
     
-    for i in range(2000):
+    for i in range(90):
         index = 19
         seq, res = generator.get_batch()
         feed_dict = {
@@ -152,19 +152,17 @@ if __name__ == '__main__':
             
     print("pause")
     
-#    for i in range(test_times-1):
-#        test_seq, test_res = generator.get_batch()
-#        feed_dict = {lstm.xs: test_seq, lstm.ys: test_res}
-#        
-#        cost, pred = sess.run([lstm.optimizer['cost'],lstm.prediction], feed_dict = feed_dict)
-#        print('cost: ', round(cost, 4))
-#        
-#        if i < test_times-2:
-#            drawtest.append(pred[:TIME_STEPS])
-#        if i == test_times-2:
-#            drawtest = np.array(drawtest).reshape([-1])
-#            last_pred = np.array(pred.reshape([-1]))
-#            drawtest = np.concatenate((drawtest,last_pred))
+    for i in range(20):
+        index = 19
+        test_seq, test_res = generator.get_batch()
+        feed_dict = {lstm.xs: test_seq, lstm.ys: test_res}
+        
+        cost, pred = sess.run([lstm.optimizer['cost'],lstm.prediction], feed_dict = feed_dict)
+        print('cost: ', round(cost, 4))
+        
+        for j in range(BATCH_SIZE):
+            drawtrain.append(pred[index])
+            index+=20        
 #            
 
 
@@ -174,7 +172,7 @@ if __name__ == '__main__':
 #    draw = np.concatenate((drawtrain,drawtest)).reshape([-1])
     
               
-    pd_drawpred = pd.DataFrame(draw)
+    pd_drawpred = pd.DataFrame(drawtrain)
     
     pd_or = pd.DataFrame(generator.norm_close)
     
