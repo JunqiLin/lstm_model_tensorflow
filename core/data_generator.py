@@ -98,13 +98,13 @@ class DataGenerator(object):
 #        self.start += TIME_STEPS
 #        return [testDataX[:,:,np.newaxis],testDataY[:,:,np.newaxis]]
     
-    def get_batch(self):
+    def get_batch(self,steps):
         BATCH_START = self.start
         x_batch = []
         y_batch=[]
         for i in range(BATCH_SIZE):
             xrow_data = self.norm_close[BATCH_START:BATCH_START+TIME_STEPS]
-            yrow_data = self.norm_close[BATCH_START+1:BATCH_START+TIME_STEPS+1]
+            yrow_data = self.norm_close[BATCH_START+steps:BATCH_START+TIME_STEPS+steps]
             x_batch.append(xrow_data)
             y_batch.append(yrow_data)
             BATCH_START += 1

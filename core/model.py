@@ -12,11 +12,13 @@ lstm model
 import numpy as np
 import pandas as pd
 from data_generator import DataGenerator
+import smooth as sm
 from CONSTANT import TIME_STEPS,BATCH_SIZE,INPUT_SIZE,OUTPUT_SIZE,CELL_SIZE,LR
 import tensorflow as tf
 import plotly.offline as py
 import plotly.graph_objs as go
 import matplotlib.pyplot as plt
+import math
 tf.reset_default_graph()
 
 class LSTM(object):
@@ -115,18 +117,21 @@ if __name__ == '__main__':
     split = 0.8
     generator = DataGenerator('add',BATCH_SIZE, TIME_STEPS, split)
     
-
-    train_times = int((generator.length-TIME_STEPS*BATCH_SIZE)/TIME_STEPS*split)
-    test_times = int(round(((generator.length-TIME_STEPS*BATCH_SIZE)/TIME_STEPS)*(1-split)))
+    
+    seq_len = BATCH_SIZE+TIME_STEPS-1
+    train_times = int(math.floor((generator.train_len - seq_len)/BATCH_SIZE))
+    times = int(math.floor((generator.length - seq_len)/BATCH_SIZE))
+    test_times = times-train_times
+    
 
     drawtrain=[]
     drawtest=[]
-    
+    drawtrend=[]
 
     
-    for i in range(90):
-        index = 19
-        seq, res = generator.get_batch()
+    for i in range(train_times):
+        index = TIME_STEPS-1
+        seq, res = generator.get_batch(1)
         feed_dict = {
                     lstm.xs: seq,
                     lstm.ys: res
@@ -141,20 +146,19 @@ if __name__ == '__main__':
         writer.add_summary(result, i)
         writer.flush()
         
-#        drawtrain.append(pred[:TIME_STEPS])
         
-        for j in range(BATCH_SIZE):
-            drawtrain.append(pred[index])
-            index+=20
-
-            
-    
+#        for j in range(BATCH_SIZE):
+#            drawtrain.append(pred[index])
+#            index+=TIME_STEPS
+    end_pre = (train_times-1)*BATCH_SIZE + seq_len -1
+    print(end_pre)
             
     print("pause")
     
-    for i in range(20):
-        index = 19
-        test_seq, test_res = generator.get_batch()
+#    ##prediction point by point
+    for i in range(test_times):
+        index = TIME_STEPS-1
+        test_seq, test_res = generator.get_batch(1)
         feed_dict = {lstm.xs: test_seq, lstm.ys: test_res}
         
         cost, pred = sess.run([lstm.optimizer['cost'],lstm.prediction], feed_dict = feed_dict)
@@ -162,28 +166,34 @@ if __name__ == '__main__':
         
         for j in range(BATCH_SIZE):
             drawtrain.append(pred[index])
-            index+=20        
-#            
+            index+=TIME_STEPS      
+#    
+    true_data = generator.norm_close[end_pre:]
+    pd_or = pd.DataFrame(generator.norm_close[end_pre:])
+    ##prediction sequence
+    t = 0
+    for _ in range(test_times):
+        data = drawtrain[t:t+BATCH_SIZE]
+        data = sm.line(data)
+        drawtrend.append(data)
+        t += BATCH_SIZE
+    
 
-
+    drawtrend = np.array(drawtrend).reshape([-1])
 
     drawtrain = np.array(drawtrain).reshape([-1])
-#    drawtest = np.array(drawtest)
-#    draw = np.concatenate((drawtrain,drawtest)).reshape([-1])
-    
-              
+
+    pd_drawtrend = pd.DataFrame(drawtrend)
     pd_drawpred = pd.DataFrame(drawtrain)
     
-    pd_or = pd.DataFrame(generator.norm_close)
     
-
-    
-    train_pic = go.Scatter(x=pd_drawpred.index, y=pd_drawpred[0], name='train_pre')
+    train_pic = go.Scatter(x=pd_drawpred.index, y=pd_drawpred[0], name='test_pre_point')
+    trend_pic = go.Scatter(x=pd_drawtrend.index, y=pd_drawtrend[0], name='test_pre_trend')
     origin_pic = go.Scatter(x=pd_or.index,y = pd_or[0],name='real data')
     
-    r = [train_pic,origin_pic]
+    r = [train_pic,origin_pic,trend_pic]
     fig = go.Figure(data=r)
     py.plot(fig)
-#    
+##    
 #    
     
