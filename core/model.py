@@ -127,11 +127,12 @@ if __name__ == '__main__':
     drawtrain=[]
     drawtest=[]
     drawtrend=[]
-
+    
+    P_STEP = 50
     
     for i in range(train_times):
         index = TIME_STEPS-1
-        seq, res = generator.get_batch(1)
+        seq, res = generator.get_batch(P_STEP)
         feed_dict = {
                     lstm.xs: seq,
                     lstm.ys: res
@@ -150,6 +151,7 @@ if __name__ == '__main__':
 #        for j in range(BATCH_SIZE):
 #            drawtrain.append(pred[index])
 #            index+=TIME_STEPS
+        
     end_pre = (train_times-1)*BATCH_SIZE + seq_len -1
     print(end_pre)
             
@@ -158,7 +160,7 @@ if __name__ == '__main__':
 #    ##prediction point by point
     for i in range(test_times):
         index = TIME_STEPS-1
-        test_seq, test_res = generator.get_batch(1)
+        test_seq, test_res = generator.get_batch(P_STEP)
         feed_dict = {lstm.xs: test_seq, lstm.ys: test_res}
         
         cost, pred = sess.run([lstm.optimizer['cost'],lstm.prediction], feed_dict = feed_dict)
