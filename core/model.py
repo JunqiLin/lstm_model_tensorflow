@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+from __future__ import division
 """
 Created on Mon Apr 22 23:01:49 2019
 
@@ -9,6 +10,7 @@ Created on Mon Apr 22 23:01:49 2019
 """
 lstm model
 """
+
 import numpy as np
 import pandas as pd
 from data_generator import DataGenerator
@@ -124,11 +126,11 @@ if __name__ == '__main__':
     test_times = times-train_times
     
 
-    drawtrain=[]
+    drawtest=[]
     drawtest=[]
     drawtrend=[]
     
-    P_STEP = 50
+    P_STEP = 1
     
     for i in range(train_times):
         index = TIME_STEPS-1
@@ -155,7 +157,7 @@ if __name__ == '__main__':
     end_pre = (train_times-1)*BATCH_SIZE + seq_len -1
     print(end_pre)
             
-    print("pause")
+    print("Test Set Cost")
     
 #    ##prediction point by point
     for i in range(test_times):
@@ -167,26 +169,45 @@ if __name__ == '__main__':
         print('cost: ', round(cost, 4))
         
         for j in range(BATCH_SIZE):
-            drawtrain.append(pred[index])
+            drawtest.append(pred[index])
             index+=TIME_STEPS      
 #    
     true_data = generator.norm_close[end_pre:]
+    ##real data
     pd_or = pd.DataFrame(generator.norm_close[end_pre:])
+    
     ##prediction sequence
     t = 0
     for _ in range(test_times):
-        data = drawtrain[t:t+BATCH_SIZE]
+        data = drawtest[t:t+BATCH_SIZE]
         data = sm.line(data)
         drawtrend.append(data)
         t += BATCH_SIZE
     
-
+    ##prediction trend curve
     drawtrend = np.array(drawtrend).reshape([-1])
 
-    drawtrain = np.array(drawtrain).reshape([-1])
-
+    ##prediction curve
+    drawtest = np.array(drawtest).reshape([-1])
+    
+    right = 0
+    wrong = 0
+#    print(len(true_data))
+#    print(len(drawtest))
+    for l in range(len(drawtest)):
+        if l == len(drawtest)-1:
+            continue
+        if (drawtest[l+1]>drawtest[l] and true_data[l+1]>true_data[l]) or (drawtest[l+1]<drawtest[l] and true_data[l+1]<true_data[l]):
+            right+=1
+        if (drawtest[l+1]>drawtest[l] and true_data[l+1]<true_data[l]) or (drawtest[l+1]<drawtest[l] and true_data[l+1]>true_data[l]):
+            wrong +=1
+            
+    print("Right:%s"%(right))
+    print("Wrong:%s"%(wrong))
+    accuracy = right / (wrong + right)
+    print("Accuracy Percentage is %s"%(accuracy))
     pd_drawtrend = pd.DataFrame(drawtrend)
-    pd_drawpred = pd.DataFrame(drawtrain)
+    pd_drawpred = pd.DataFrame(drawtest)
     
     
     train_pic = go.Scatter(x=pd_drawpred.index, y=pd_drawpred[0], name='test_pre_point')
