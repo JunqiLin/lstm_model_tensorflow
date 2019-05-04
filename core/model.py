@@ -24,7 +24,9 @@ import math
 tf.reset_default_graph()
 
 class LSTM(object):
-    
+    """
+    lstm model
+    """
     def __init__(self, n_steps, input_size, output_size, cell_size, batch_size):
         self.xs = tf.placeholder(tf.float32, [None, n_steps, input_size], name='xs')
         self.ys = tf.placeholder(tf.float32, [None, n_steps, output_size ], name='ys')
@@ -37,7 +39,9 @@ class LSTM(object):
 
         self.prediction = self.build_model()['pred']
         self.optimizer = self.train_lstm(self.prediction)
-        
+    """
+    generate random weights and biases
+    """    
     @staticmethod 
     def _weight_variable(shape, name='weights'):
         initializer = tf.random_normal_initializer(mean=0., stddev=1.,)
@@ -49,9 +53,13 @@ class LSTM(object):
     @staticmethod 
     def ms_error(labels, logits):
         return tf.square(tf.subtract(labels, logits))
+    ##mean-square function to calculate error
+    
     
     def build_model(self):
-        
+        """
+        build input hidden layer
+        """
         with tf.variable_scope('in_hidden'):
             l_in_x = tf.reshape(self.xs, [-1, self.input_size], name='2_2D')
             Ws_in = self._weight_variable([self.input_size, self.cell_size])
@@ -61,7 +69,9 @@ class LSTM(object):
                 l_in_y = tf.matmul(l_in_x, Ws_in) + bs_in
             l_in_y = tf.reshape(l_in_y, [-1, self.n_steps, self.cell_size], name='2_3D')
     
-        ##lstm cell
+        """
+        build lstm cell and feed data from input hidden layer into it
+        """
         with tf.variable_scope('LSTM_cell'):
             lstm_cell = tf.contrib.rnn.BasicLSTMCell(self.cell_size, forget_bias=1.0, state_is_tuple=True)
             with tf.name_scope('initial_state'):
@@ -69,7 +79,9 @@ class LSTM(object):
             cell_outputs, cell_final_state = tf.nn.dynamic_rnn(
                     lstm_cell, l_in_y, initial_state=cell_init_state, time_major=False)
     
-        ##output layer
+        """
+        build output hidden layer
+        """
         with tf.variable_scope('out_hidden'):
             l_out_x = tf.reshape(cell_outputs, [-1, self.cell_size], name='2_2D')
             Ws_out = self._weight_variable([self.cell_size, self.output_size])
@@ -83,7 +95,9 @@ class LSTM(object):
         return model
     
     def train_lstm(self, pred):
- 
+        """
+        calculate loss
+        """
         with tf.name_scope('cost'):
             losses = tf.contrib.legacy_seq2seq.sequence_loss_by_example(
                 [tf.reshape(pred, [-1], name='reshape_pred')],
@@ -99,7 +113,9 @@ class LSTM(object):
                     self.batch_size,
                     name='average_cost')
                 tf.summary.scalar('cost', cost)
-            
+        """
+        AdamOptimizer training
+        """
         with tf.name_scope('train'):
             train_op = tf.train.AdamOptimizer(LR).minimize(cost)
         result={'cost':cost,'train_op':train_op}
@@ -131,7 +147,9 @@ if __name__ == '__main__':
     drawtrend=[]
     
     P_STEP = 1
-    
+    """
+    training
+    """
     for i in range(train_times):
         index = TIME_STEPS-1
         seq, res = generator.get_batch(P_STEP)
@@ -150,16 +168,15 @@ if __name__ == '__main__':
         writer.flush()
         
         
-#        for j in range(BATCH_SIZE):
-#            drawtrain.append(pred[index])
-#            index+=TIME_STEPS
         
     end_pre = (train_times-1)*BATCH_SIZE + seq_len -1
     print(end_pre)
             
     print("Test Set Cost")
     
-#    ##prediction point by point
+    """
+    testing
+    """
     for i in range(test_times):
         index = TIME_STEPS-1
         test_seq, test_res = generator.get_batch(P_STEP)
@@ -183,7 +200,9 @@ if __name__ == '__main__':
         data = sm.line(data)
         drawtrend.append(data)
         t += BATCH_SIZE
-    
+    """
+    output result
+    """
     ##prediction trend curve
     drawtrend = np.array(drawtrend).reshape([-1])
 
@@ -192,8 +211,7 @@ if __name__ == '__main__':
     
     right = 0
     wrong = 0
-#    print(len(true_data))
-#    print(len(drawtest))
+
     for l in range(len(drawtest)):
         if l == len(drawtest)-1:
             continue

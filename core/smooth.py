@@ -14,6 +14,9 @@ import numpy as np
 data = np.array([1,2,3,4,2,3,5,6])
 
 def line(data):
+    """
+    fitting line
+    """
     length = len(data)
     result = np.zeros(length)
     start = 0
@@ -37,7 +40,9 @@ def line(data):
 
 
 def equation(data):
-    
+    """
+    fitting curve line
+    """
     length = len(data)
     start = 0
     end = length - 1
@@ -56,9 +61,6 @@ def equation(data):
               a * x[2]**3 + b * x[2]**2 + c* x[2] +d - y[2],
                a * x[3]**3 + b * x[3]**2 + c* x[3] +d - y[3]],[a, b, c, d])
     
-#    y = f[a]*num**3 + f[b]*num**2 + f[c]*num + f[d] 
-#    return y
-
 
     degree = 1000
     z = np.zeros(degree)
@@ -77,9 +79,6 @@ def equation(data):
         result[i] = z[int((i/length)*degree)]
     return h,result
 
-#h,z = equation(data)
-#plt.plot(h,z)
-#plt.show()
 
 
 

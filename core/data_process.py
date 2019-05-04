@@ -11,7 +11,7 @@ data_process
 """
 
 """
-导入CSV历史数据到MongoDB中
+Store csv file data into Mongodb 
 """
 
 
@@ -27,7 +27,9 @@ from CONSTANT import DB_NAME
 
 
 class BarData(object):
-    
+    """
+    standard data format designed
+    """
     def __init__(self):
         """"""
         self.symbol = 0
@@ -67,8 +69,8 @@ if __name__ =="__main__":
     flag="all"
     if flag =="all":
         path = os.path.abspath(os.path.dirname(os.getcwd()))+'/data'
-#        filenames = os.listdir(path)[2:]
-        filenames=['add.csv']
+        filenames = os.listdir(path)[2:]
+#        filenames=['add.csv']
         for f in filenames:
             print(f)
             fn = path+'/'+str(f)
